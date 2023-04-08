@@ -3,9 +3,9 @@
     {
         $servername = 'localhost';
         $username = 'root';
-        $password = '';
-        $database = 'sbtbsphp';
-
+        $password = 'root';
+        $database = 'obtbs';
+        
         $conn = mysqli_connect($servername, $username, $password, $database);
         return $conn;
     }
@@ -27,6 +27,7 @@
 
         $result = mysqli_query($conn, $sql);
         $num = mysqli_num_rows($result);
+        
         if($num)
         {
             $row = mysqli_fetch_assoc($result);

@@ -1,9 +1,13 @@
 <?php
-    require 'assets/partials/_functions.php';//getting functions which is connected to the database
+    require 'assets/partials/_functions.php';
     $conn = db_connect();    
 
     if(!$conn) 
         die("Connection Failed");
+   use PHPMailer\PHPMailer\PHPMailer;
+   use PHPMailer\PHPMailer\Exception;
+ 
+  require "./vendor/autoload.php";
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +26,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
     <!-- CSS -->
     <?php 
-        require 'assets/styles/styles.php'//styling 
+        require 'assets/styles/styles.php'
     ?>
 </head>
 <body>
@@ -45,103 +49,6 @@
             </div>';
         }
     }
-     
-    
-    if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["pnr-search"]))
-    {
-        $pnr = $_POST["pnr"];
-
-        $sql = "SELECT * FROM bookings WHERE booking_id='$pnr'";
-        $result = mysqli_query($conn, $sql);
-
-        $num = mysqli_num_rows($result);
-
-        if($num)
-        {
-            $row = mysqli_fetch_assoc($result);
-            $route_id = $row["route_id"];
-            $customer_id = $row["customer_id"];
-            
-            $customer_name = get_from_table($conn, "customers", "customer_id", $customer_id, "customer_name");
-
-            $customer_phone = get_from_table($conn, "customers", "customer_id", $customer_id, "customer_phone");
-
-            $customer_route = $row["customer_route"];
-            $booked_amount = $row["booked_amount"];
-
-            $booked_seat = $row["booked_seat"];
-            $booked_timing = $row["booking_created"];
-
-            $dep_date = get_from_table($conn, "routes", "route_id", $route_id, "route_dep_date");
-
-            $dep_time = get_from_table($conn, "routes", "route_id", $route_id, "route_dep_time");
-
-            $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
-            ?>
-
-            <div class="alert alert-dark alert-dismissible fade show" role="alert">
-            
-            <h4 class="alert-heading">Booking Information!</h4>
-            <p>
-                <button class="btn btn-sm btn-success"><a href="assets/partials/_download.php?pnr=<?php echo $pnr; ?>" class="link-light">Download</a></button>
-                <button class="btn btn-danger btn-sm" id="deleteBooking" data-bs-toggle="modal" data-bs-target="#deleteModal" data-pnr="<?php echo $pnr;?>" data-seat="<?php echo $booked_seat;?>" data-bus="<?php echo $bus_no; ?>">
-                    Delete
-                </button>
-            </p>
-            <hr>
-                <p class="mb-0">
-                    <ul class="pnr-details">
-                        <li>
-                            <strong>PNR : </strong>
-                            <?php echo $pnr; ?>
-                        </li>
-                        <li>
-                            <strong>Customer Name : </strong>
-                            <?php echo $customer_name; ?>
-                        </li>
-                        <li>
-                            <strong>Customer Phone : </strong>
-                            <?php echo $customer_phone; ?>
-                        </li>
-                        <li>
-                            <strong>Route : </strong>
-                            <?php echo $customer_route; ?>
-                        </li>
-                        <li>
-                            <strong>Bus Number : </strong>
-                            <?php echo $bus_no; ?>
-                        </li>
-                        <li>
-                            <strong>Booked Seat Number : </strong>
-                            <?php echo $booked_seat; ?>
-                        </li>
-                        <li>
-                            <strong>Departure Date : </strong>
-                            <?php echo $dep_date; ?>
-                        </li>
-                        <li>
-                            <strong>Departure Time : </strong>
-                            <?php echo $dep_time; ?>
-                        </li>
-                        <li>
-                            <strong>Booked Timing : </strong>
-                            <?php echo $booked_timing; ?>
-                        </li>
-
-                </p>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php }
-        else{
-            echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error!</strong> Record Doesnt Exist
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>';
-        }
-        
-    ?>
-        
-    <?php }
     
 if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["pnr-search"]))
 {
@@ -178,53 +85,52 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["pnr-search"]))
         <div class="alert alert-dark alert-dismissible fade show" role="alert">
         
         <h4 class="alert-heading">Booking Information!</h4>
-        <p>
-            <button class="btn btn-sm btn-success"><a href="assets/partials/_download.php?pnr=<?php echo $pnr; ?>" class="link-light">Download</a></button>
-            <button class="btn btn-danger btn-sm" id="deleteBooking" data-bs-toggle="modal" data-bs-target="#deleteModal" data-pnr="<?php echo $pnr;?>" data-seat="<?php echo $booked_seat;?>" data-bus="<?php echo $bus_no; ?>">
-                Delete
-            </button>
-        </p>
+        
         <hr>
             <p class="mb-0">
                 <ul class="pnr-details">
                     <li>
-                        <strong>PNR : </strong>
+                        <b>PNR : </b>
                         <?php echo $pnr; ?>
                     </li>
                     <li>
-                        <strong>Customer Name : </strong>
+                        <b>Customer Name : </b>
                         <?php echo $customer_name; ?>
                     </li>
                     <li>
-                        <strong>Customer Phone : </strong>
+                        <b>Customer Phone : </b>
                         <?php echo $customer_phone; ?>
                     </li>
                     <li>
-                        <strong>Route : </strong>
+                        <b>Route : </b>
                         <?php echo $customer_route; ?>
                     </li>
                     <li>
-                        <strong>Bus Number : </strong>
+                        <b>Bus Number : </b>
                         <?php echo $bus_no; ?>
                     </li>
                     <li>
-                        <strong>Booked Seat Number : </strong>
+                        <b>Booked Seat Number : </b>
                         <?php echo $booked_seat; ?>
                     </li>
                     <li>
-                        <strong>Departure Date : </strong>
+                        <b>Departure Date : </b>
                         <?php echo $dep_date; ?>
                     </li>
                     <li>
-                        <strong>Departure Time : </strong>
+                        <b>Departure Time : </b>
                         <?php echo $dep_time; ?>
                     </li>
                     <li>
-                        <strong>Booked Timing : </strong>
+                        <b>Booked Timing : </b>
                         <?php echo $booked_timing; ?>
                     </li>
 
             </p>
+        <hr>
+        <p>
+            <button class="btn btn-sm btn-success"><a href="assets/partials/_download.php?pnr=<?php echo $pnr; ?>" class="link-light">Download</a></button>
+        </p>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php }
@@ -239,6 +145,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["pnr-search"]))
     
 <?php }
 
+// Bus-Search from and to Reply
+
 if( $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["bus-search"]))
 {
 // retrieve the user's search inputs
@@ -246,26 +154,104 @@ $from = $_POST["from"];
 $to = $_POST["to"];
 
 $from_to = $from . "," . $to;
-$sql = "SELECT * FROM routes WHERE 'routes'.'route_cities' = '$from_to'";
+    
+$sql = "SELECT * FROM routes WHERE route_cities = '$from_to'";
 $result = mysqli_query($conn, $sql);
 
 $num = mysqli_num_rows($result);
 
-// display the search results
+$from_to = $from . "→" . $to;
 if ($num) {
-    echo "<Bus Details>";
-    echo "<tr><th>Bus Number</th><th>Route Cities</th><th>Departure Date</th><th>Departure Time</th><th>Fare</th></tr>";
+    
+    ?>
+    <div class="alert alert-dark alert-dismissible fade show" role="alert">
+    
+    <h4 class="alert-heading">Available Buses: <?php echo $from_to ;?> </h4>
+    <hr>
+    <?php
+   
+    echo "<table>";
+    echo "<tr><th>Bus Number&nbsp;&nbsp;&nbsp;</th>"."  "."<th>Departure Date&nbsp;&nbsp;&nbsp;</th><th>Departure Time&nbsp;&nbsp;&nbsp;</th><th>Fare&nbsp;</th></tr>";
     
     while($row = mysqli_fetch_assoc($result)) {
-        echo "<tr><td>" . $row["bus`_no"] . "</td><td>" . $row["route_cities"] . "</td><td>" . $row["route_dep_date"] . "</td><td>" . $row["route_dep_time"] . "</td><td>" . $row["route_step_cost"] . "</td></tr>";
+        echo "<tr><td>" . $row["bus_no"] . "</td><td>" . $row["route_dep_date"] . "</td><td>" . $row["route_dep_time"] . "</td><td>" . $row["route_step_cost"] . "</td></tr>";
     }
     echo "</table>";
+    ?>
+    <hr>
+    <p>
+        <button class="btn btn-sm btn-success"><a href="assets/partials/_downloadbuses.php?bus-search=<?php echo $from_to; ?>&amp;from=<?php echo $from; ?>&amp;to=<?php echo $to; ?>" class="link-light">Download</a></button>
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php
 }
 else {
-    echo "No results found.";
+    echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+        No Available Buses!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>';
 }
 }
 
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["feedback-submit"])) {
+    
+    $email = $_POST["email"];
+    $message = $_POST["message"];
+    
+    $mail = new PHPMailer(true);
+     
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'tirzah8790@gmail.com';
+        $mail->Password   = 'dvuqglwqohfbskqz';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+
+        $mail->addBCC('tirzah8790@gmail.com');
+
+       
+        $mail->Subject = 'Online Bus Ticket Portal Feedback' ;
+        $mail->Body    = $message."\n";
+        $mail->Body    = $mail->Body . "From : ". $email ;
+        $mail->AltBody = 'Body in plain text for non-HTML mail clients';
+        $mail->send();
+        
+        $mail_to = new PHPMailer(true);
+        
+        $mail_to->isSMTP();
+        $mail_to->Host       = 'smtp.gmail.com';
+        $mail_to->SMTPAuth   = true;
+        $mail_to->Username   = 'tirzah8790@gmail.com';
+        $mail_to->Password   = 'dvuqglwqohfbskqz';
+        $mail_to->SMTPSecure = 'tls';
+        $mail_to->Port       = 587;
+
+        $mail_to->addBCC($email) ;
+        $mail_to->Subject = 'Online Bus Ticket Portal Feedback';
+        $mail_to->Body    = "Feedback received. Thank you for Contacting us!" ;
+        $mail_to->AltBody = 'Body in plain text for non-HTML mail clients';
+        $mail_to->send();
+        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+        Feedback is submited successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    } catch (Exception $e) {
+        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+         Message could not be sent.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    }
+    
+}
+?>
+
+
+
+<?php
         // Delete Booking
         if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBtn"]))
         {
@@ -341,23 +327,23 @@ else {
     <!-- Login Modal -->
     <?php require 'assets/partials/_loginModal.php'; 
         require 'assets/partials/_getJSON.php';
-        require 'assets/partials/_userloginModal.php';
-            
+        require 'assets/partials/_user_loginModal.php';
+
         $routeData = json_decode($routeJson);
         $busData = json_decode($busJson);
         $customerData = json_decode($customerJson);
     ?>
-    
+     
 
     <section id="home">
         <div id="route-search-form">
             <h1>Online Bus Ticket Booking System</h1>
 
          <!--  <p class="text-center">Welcome to Online Bus Ticket Booking System. Login now to manage bus tickets and much more. OR, simply scroll down to check the Ticket status using Passenger Name Record (PNR number)</p>
-          <center>
+          
 -->
 
-
+<center>
 <div id="search-box">
 <form action="<?php echo $_SERVER["REQUEST_URI"]; ?>" method="POST">
   <div>
@@ -379,49 +365,16 @@ else {
             </center>
 
             <br>
-            <center>
-                <button class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#userloginModal">User Login</button>
+            
+             <center>
+                <button class="btn btn-danger " data-bs-toggle="modal" data-bs-target="#user_loginModal">User Login</button>
                 
             </center>
             <br>
-            <center>
-            <a href="#pnr-enquiry"><button class="btn btn-primary">Scroll Down <i class="fa fa-arrow-down"></i></button></a>
-            </center>
-            
         </div>
     </section>
    
-    <div id="block">
-        <section id="info-num">
-            <figure>
-                <img src="./assets/img/busroute.svg" alt="Bus Route Icon" width="100px" height="100px">
-                <figcaption>
-                    <span class="num counter" data-target="<?php echo count($routeData); ?>">999</span>
-                    <span class="icon-name">routes</span>
-                </figcaption>
-            </figure>
-            <figure>
-                <img src="./assets/img/bus.svg" alt="Bus Icon" width="100px" height="100px">
-                <figcaption>
-                    <span class="num counter" data-target="<?php echo count($busData); ?>">999</span>
-                    <span class="icon-name">bus</span>
-                </figcaption>
-            </figure>
-            <figure>
-                <img src="./assets/img/customer.jpeg" alt="Happy Customers" width="100px" height="100px">
-                <figcaption>
-                    <span class="num counter" data-target="<?php echo count($customerData); ?>">999</span>
-                    <span class="icon-name">happy customers</span>
-                </figcaption>
-            </figure>
-            <figure>
-                <img src="./assets/img/ticket.jpeg" alt="Instant Ticket Icon" width="100px" height="100px">
-                <figcaption>
-                    <span class="num"><span class="counter" data-target="20">999</span> SEC</span> 
-                    <span class="icon-name">Instant Tickets</span>
-                </figcaption>
-            </figure>
-        </section>
+   
         <section id="pnr-enquiry">
             <div id="pnr-form">
                 <h2>PNR ENQUIRY</h2>
@@ -444,9 +397,6 @@ Welcome to our online bus booking portal, where you can easily book bus tickets 
 Whether you are traveling for business or pleasure, our website has all the tools you need to plan your trip. You can easily search for available buses between your desired destinations, compare prices, and select the seat of your choice.
 </p>
 <p>
-At our online bus booking portal, we pride ourselves on providing excellent customer service. Our team is always available to assist you with any queries you may have, and we strive to provide quick and efficient solutions to any issues you may encounter.
-</p>
-<p>
 Thank you for choosing our online bus booking portal for your travel needs. We look forward to serving you and making your travel experience as hassle-free as possible.
                 </p>
             </div>
@@ -456,27 +406,27 @@ Thank you for choosing our online bus booking portal for your travel needs. We l
         <h1 style="font-family: Helvetica ,sans-serif; color: red ; ">Contact Us</h1>
            <form action="<?php echo $_SERVER["REQUEST_URI"]; ?>" method="POST">
             <div>
-                <label for="name">Name</label>
-                <input type="text" name="name" id="name">
+                <label for="email">Email</label>
+                <input type="text" name="email" id="email">
             </div>
             <div>
-                <label for="email">Email Address</label>
-                <input type="email" name="email" id="email">
-            </div>
-            <div>
-                <label for="message">Message</label>
+                <label for="message">Feedback</label>
                 <textarea name="message" id="message" cols="30" rows="10"></textarea>
             </div>
             <div>
-                <button type="submit" name="submit">Submit</button>
+                <button type="submit" name="feedback-submit">Submit</button>
             </div>
         </form>
     </div>
 </section>
-
+<?php
+// Display a success message
+   if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['feedback-submit']))
+        { echo "<p>Thank you for contacting us!</p>"; }
+?>
         <footer>
         <p>
-                        <i class="far fa-copyright"></i> <?php echo date('Y');?> - Online Bus Ticket Booking System | Made with &#10084;&#65039; by Ritesh, Tapaswini, Tirzah
+                        <i class="far fa-copyright"></i> <?php echo date('Y');?> - Online Bus Ticket Booking System | Made with &#10084;&#65039; by Ritesah, Tapaswini, Tirzah
                         </p>
         </footer>
     </div>

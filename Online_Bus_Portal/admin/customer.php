@@ -21,6 +21,97 @@
         require '../assets/styles/admin-options.php';
         $page="customer";
     ?>
+
+
+
+<style>
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+    margin-top: 10px;
+  margin-right: 20px;
+}
+.form-control {
+  border: 2px solid #ccc;
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #555;
+  transition: all 0.3s ease-in-out;
+}
+.form-control:focus {
+  border-color: #8bc34a;
+  box-shadow: none;
+  outline: 0;
+}
+.btn-close {
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #8bc34a;
+  border-color: #8bc34a;
+}
+
+.btn-success {
+  border-radius: 5px;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #8bc34a;
+  border-color: #8bc34a;
+  margin: 15px ;
+}
+
+.btn-close:hover, .btn-close:focus {
+  background-color: #7cb342;
+  border-color: #7cb342;
+}
+label {
+  font-weight: bold;
+  
+  padding: 10px;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+input[type="text"] {
+  
+  padding: 10px;
+  margin : 10px;
+  border : 2px solid black;
+  border-radius: 5px;
+
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+input[type="tel"] {
+  padding: 10px;
+  margin: 10px;
+  border : 2px solid black;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+input[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+    margin-left: 20px;
+   
+}
+
+input[type="submit"]:hover {
+  background-color: #3e8e41;
+}
+
+</style>
 </head>
 <body>
     <!-- Requiring the admin header files -->
@@ -41,45 +132,46 @@
                  Check if the $_POST key 'submit' exists
                 */
                 // Should be validated client-side
-                $cname = $_POST["cfirstname"] . " " . $_POST["clastname"];
+                
+                
+                
+                $cname = $_POST["cfirstname"] ." ". $_POST["clastname"];
                 $cphone = $_POST["cphone"];
         
+                if($cname==" " || $cphone==" ")
+                    {
+                        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong> Name and Contact should not be empty!. Customer is not added!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>';
+                    }
+                else {
+                   
                 $customer_exists = exist_customers($conn,$cname,$cphone);
                 $customer_added = false;
         
-                if(!$customer_exists)
-                {
+                if(!$customer_exists) {
                     // Route is unique, proceed
-                    $sql = "INSERT INTO `customers` (`customer_name`, `customer_phone`, `customer_created`) VALUES ('$cname', '$cphone', current_timestamp());";
-                    $result = mysqli_query($conn, $sql);
-                    // Gives back the Auto Increment id
                     $autoInc_id = mysqli_insert_id($conn);
-                    // If the id exists then, 
-                    if($autoInc_id)
-                    {
-                        $code = rand(1,99999);
-                        // Generates the unique userid
-                        $customer_id = "CUST-".$code.$autoInc_id;
-                        
-                        $query = "UPDATE `customers` SET `customer_id` = '$customer_id' WHERE `customers`.`id` = $autoInc_id;";
-                        $queryResult = mysqli_query($conn, $query);
+                    $code = rand(1, 99999);
+                    $customer_id = "CUST-". $code. $autoInc_id;
+                    $sql = "INSERT INTO `customers` (`customer_id`, `customer_name`, `customer_phone`, `customer_created`) VALUES ('$customer_id', '$cname', '$cphone', current_timestamp());";
+                    $stmt = mysqli_prepare($conn, $sql);
+                    $result = mysqli_stmt_execute($stmt);
 
-                        if(!$queryResult)
-                            echo "Not Working";
+                    if(!$result) {
+                        // Handle errors
+                        echo "Error: " . mysqli_error($conn);
                     }
-
-                    if($result)
-                        $customer_added = true;
-                }
-    
-                if($customer_added)
-                {
-                    // Show success alert
-                    echo '<div class="my-0 alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Successful!</strong> Customer Added
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>';
-                }
+                    else {  $customer_added = true;
+                        // Show success alert
+                        echo '<div class="my-0 alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Successful!</strong> Customer Added
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>';
+                    }
+                    }
+                   
                 else{
                     // Show error alert
                     echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
@@ -88,59 +180,9 @@
                     </div>';
                 }
             }
-            if(isset($_POST["edit"]))
-            {
-                // EDIT ROUTES
-                $cname = $_POST["cname"];
-                $cphone = $_POST["cphone"];
-                $id = $_POST["id"];
-                $id_if_customer_exists = exist_customers($conn,$cname,$cphone);
-
-                if(!$id_if_customer_exists || $id == $id_if_customer_exists)
-                {
-                    $updateSql = "UPDATE `customers` SET
-                    `customer_name` = '$cname',
-                    `customer_phone` = '$cphone' WHERE `customers`.`customer_id` = '$id';";
-
-                    $updateResult = mysqli_query($conn, $updateSql);
-                    $rowsAffected = mysqli_affected_rows($conn);
-    
-                    $messageStatus = "danger";
-                    $messageInfo = "";
-                    $messageHeading = "Error!";
-    
-                    if(!$rowsAffected)
-                    {
-                        $messageInfo = "No Edits Administered!";
-                    }
-    
-                    elseif($updateResult)
-                    {
-                        // Show success alert
-                        $messageStatus = "success";
-                        $messageHeading = "Successfull!";
-                        $messageInfo = "Customer details Edited";
-                    }
-                    else{
-                        // Show error alert
-                        $messageInfo = "Your request could not be processed due to technical Issues from our part. We regret the inconvenience caused";
-                    }
-    
-                    // MESSAGE
-                    echo '<div class="my-0 alert alert-'.$messageStatus.' alert-dismissible fade show" role="alert">
-                    <strong>'.$messageHeading.'</strong> '.$messageInfo.'
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>';
-                }
-                else{
-                    // If customer details already exists
-                    echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error!</strong> Customer already exists
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>';
-                }
-
-            }
+        }
+            
+            
             if(isset($_POST["delete"]))
             {
                 // DELETE ROUTES
@@ -177,7 +219,77 @@
                 </div>';
             }
         }
+
+        if( isset($_GET["name"]) || isset($_GET["contact"]))
+          {
+              $name = $_GET["name"];
+              $contact = $_GET["contact"];
+              $sql = "SELECT * FROM customers WHERE 1=1 ";
+
+              if (!empty($name)) {
+                  $sql .= " AND customer_name = '$name'";
+              }
+
+              if (!empty($contact)) {
+                  $sql .= " AND customer_phone = '$contact'";
+              }
+              
+              $result = mysqli_query($conn, $sql);
+              
+              $num = mysqli_num_rows($result);
+              
+              if($num)
+                  {
+                      ?>
+                      <table class="table table-hover table-bordered">
+                          <thead>
+                              <th>ID</th>
+                              <th>Name</th>
+                              <th>Contact</th>
+                          </thead>
+                      <?php
+                      while($row = mysqli_fetch_assoc($result))
+                      {
+                          $id = $row["id"];
+                          $customer_id = $row["customer_id"];
+                          $customer_name = $row["customer_name"];
+                          $customer_phone = $row["customer_phone"];
+                  ?>
+                  <tr>
+                      <td>
+                          <?php
+                              echo $customer_id;
+                          ?>
+                      </td>
+                      <td>
+                          <?php
+                              echo $customer_name;
+                          ?>
+                      </td>
+                      <td>
+                          <?php
+                              echo $customer_phone;
+                          ?>
+                      </td>
+                    </tr>
+                          <?php
+                  }
+                    ?>  </table>
+                      </table>
+                      <a href="customer.php" class="btn btn-primary">Back</a>
+<?php
+                      
+          }
+              else{
+                  echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                  <strong>Error!</strong> No results found!
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>';
+              }
+        }
+     
         ?>
+
         <?php
             $resultSql = "SELECT * FROM `customers` ORDER BY customer_created DESC";
                             
@@ -198,6 +310,17 @@
             <?php }
             else { ?>   
             <!-- If Customers are present -->
+                
+                <form method="GET" >
+                  <label for="name">Name: </label>
+                  <input type="text" name="name" id="name"  placeholder="Enter Name">
+                  <br>
+                  <label for="contact">Contact: </label>
+                  <input type="text" name="contact" id="contact"  placeholder="Enter Contact">
+                  <br>
+                  <input type="submit" value="Search">
+                </form>
+                      
             <section id="customer">
                 <div id="head">
                     <h4>Customer Status</h4>
@@ -241,11 +364,7 @@
                                 ?>
                             </td>
                             <td>
-                            <button class="button edit-button " data-link="<?php echo $_SERVER['REQUEST_URI']; ?>" data-id="<?php 
-                                                echo $customer_id;?>" data-name="<?php 
-                                                echo $customer_name;?>" data-phone="<?php 
-                                                echo $customer_phone;?>"
-                                                >Edit</button>
+                            
                                             <button class="button delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="<?php 
                                                 echo $id;?>">Delete</button>
                             </td>
@@ -271,16 +390,18 @@
                     <div class="modal-body">
                         <form id="addCustomerForm" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
                             <div class="mb-3">
-                                <label for="cfirstname" class="form-label">Customer Firstname</label>
-                                <input type="text" class="form-control" id="cfirstname" name="cfirstname">
+                                <label for="cfirstname" class="label">Firstname</label>
+                                <input type="text" class="form-control" id="cfirstname" name="cfirstname" required>
                             </div>
+   <br>
                             <div class="mb-3">
-                                <label for="clastname" class="form-label">Customer Lastname</label>
-                                <input type="text" class="form-control" id="clastname" name="clastname">
+                                <label for="clastname" class="label">Lastname</label>
+                                <input type="text" class="form-control" id="clastname" name="clastname" required>
                             </div>
+<br>
                             <div class="mb-3">
-                                <label for="cphone" class="form-label">Contact Number</label>
-                                <input type="tel" class="form-control" id="cphone" name="cphone">
+                                <label for="cphone" class="label">Contact</label>
+                                <input type="tel" class="form-control" id="cphone" name="cphone" required>
                             </div>
                             <button type="submit" class="btn btn-success" name="submit">Submit</button>
                         </form>
@@ -304,7 +425,7 @@
                     Are you sure?
                 </h2>
                 <p>
-                    Do you really want to delete these customer details? <strong>This process cannot be undone.</strong>
+                    <strong>This process cannot be undone.</strong>
                 </p>
                 <!-- Needed to pass id -->
                 <form action="<?php echo $_SERVER['REQUEST_URI']; ?>" id="delete-form"  method="POST">

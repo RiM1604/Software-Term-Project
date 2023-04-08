@@ -24,6 +24,8 @@
     ?>
 </head>
 <body>
+    
+
     <!-- Requiring the admin header files -->
     <?php require '../assets/partials/_admin-header.php';?>
     <?php
@@ -33,7 +35,7 @@
                 while($row = mysqli_fetch_assoc($resultBusSql))
                     $arr[] = $row;
                 $busJson = json_encode($arr);
-            ?>
+    ?>
 
             <section id="seat">
                 <div id="head">

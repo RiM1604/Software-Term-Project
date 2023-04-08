@@ -1,7 +1,6 @@
 <!-- Show these admin pages only when the admin is logged in -->
 <?php  require '../assets/partials/_admin-check.php';   ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +21,37 @@
         require '../assets/styles/admin-options.php';
         $page="bus";
     ?>
+<style>
+  /* Add some custom styles to the search box */
+  .input-group {
+    width: 90%;
+  }
+  .form-control {
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #555;
+    transition: all 0.3s ease-in-out;
+  }
+  .form-control:focus {
+    border-color: #8bc34a;
+    box-shadow: none;
+    outline: 0;
+  }
+  .btn-success {
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #8bc34a;
+    border-color: #8bc34a;
+  }
+  .btn-success:hover, .btn-success:focus {
+    background-color: #7cb342;
+    border-color: #7cb342;
+  }
+</style>
 </head>
 <body>
     <!-- Requiring the admin header files -->
@@ -200,7 +230,70 @@
                     <div>
                         <button id="add-button" class="button btn-sm" type="button"data-bs-toggle="modal" data-bs-target="#addModal">Add Bus Details <i class="fas fa-plus"></i></button>
                     </div>
+               
+                <form class="form-inline my-2 my-lg-0" method="GET">
+                  <div class="input-group">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search Bus Number" aria-label="Search" name="q">
+                    <div class="input-group-append">
+                      <button class="btn btn-success" type="submit">Search</button>
+                    </div>
+                  </div>
+                </form>
+                
+                <?php
+                if(isset($_GET['q']))
+                {
+                    $bus = $_GET['q'] ;
+                    $sql = "SELECT * FROM `buses` WHERE `buses`.`bus_no` = '$bus'";
+                    // Execute the query
+                    $result = mysqli_query($conn, $sql);
+
+                    // Display the results in a table
+                    if(mysqli_num_rows($result) > 0) {
+                        
+                        echo '<table class="table table-hover table-bordered table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Bus Number</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+
+                        $count = 0;
+                        while($row = mysqli_fetch_assoc($result)) {
+                            $id = $row['id'];
+                            $busno = $row['bus_no'];
+                            $buscreated = $row['bus_created'];
+                            $count++;
+
+                            echo '<tr>
+                                <th scope="row">' . $count . '</th>
+                                <td>' . $busno . '</td>
+                                <td>' . $buscreated . '</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModal" data-id="' . $id . '" data-busno="' . $busno . '">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="' . $id . '">Delete</button>
+                                </td>
+                            </tr>';
+                        }
+
+                        echo '</tbody></table>';
+                        echo '<a href="bus.php" class="btn btn-primary">Back</a>' ;
+                        echo '</div>';
+                    }
                     
+                    else {
+                        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                             No Buses Found ' ;
+                          echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' ;
+                        echo '</div>';
+                    }
+                }
+               
+?>
                     <table class="table table-hover table-bordered">
                         <thead>
                             <th>#</th>

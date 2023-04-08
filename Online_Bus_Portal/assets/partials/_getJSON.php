@@ -1,4 +1,5 @@
-<?php
+ <?php
+    require_once '_functions.php';
     // Route JSON
     $rtSql = "Select * from routes";
     $resultrtSql = mysqli_query($conn, $rtSql);

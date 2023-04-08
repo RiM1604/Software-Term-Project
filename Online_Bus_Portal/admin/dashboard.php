@@ -48,7 +48,7 @@
     // echo "</pre>";
 
     ?>
-
+  <p></p>   <p></p>
             <section id="dashboard">
                 
                 <div id="status">
@@ -59,15 +59,8 @@
                                 <i class="fas fa-ticket-alt"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Bookings</p>
-                            <p class="num" data-target="<?php 
-                                    echo count($bookingData);
-                                ?>">
-                                999
-                            </p>
-                        </div>
-                        <a href="./booking.php">View More <i class="fas fa-arrow-right"></i></a>
+
+                        <a href="./booking.php">Enter<i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div id="Bus" class="info-box status-item">
                         <div class="heading">
@@ -76,15 +69,8 @@
                                 <i class="fas fa-bus"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Buses</p>
-                            <p class="num" data-target="<?php 
-                                    echo count($busData);
-                                ?>">
-                                999
-                            </p>
-                        </div>
-                        <a href="./bus.php">View More <i class="fas fa-arrow-right"></i></a>
+
+                        <a href="./bus.php">Enter <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div id="Route" class="info-box status-item">
                         <div class="heading">
@@ -93,14 +79,7 @@
                                 <i class="fas fa-road"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Routes</p>
-                            <p class="num" data-target="<?php 
-                                    echo count($routeData);
-                                ?>">
-                                999
-                            </p>
-                        </div>
+
                         <a href="./route.php">View More <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div id="Seat" class="info-box status-item">
@@ -110,14 +89,7 @@
                                 <i class="fas fa-th"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Seats</p>
-                            <p class="num" data-target="<?php 
-                                    echo 38 * count($busData);
-                                ?>">
-                                999
-                            </p>
-                        </div>
+
                         <a href="./seat.php">View More <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
@@ -130,15 +102,7 @@
                                 <i class="fas fa-users"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Customers</p>
-                            <p class="num" data-target="<?php 
-                                    echo count($customerData);
-                                ?>">
-                                999
-                            </p>
-                        </div>
-                        <a href="./customer.php">View More <i class="fas fa-arrow-right"></i></a>
+                     <a href="./customer.php">View More <i class="fas fa-arrow-right"></i></a>
                     </div>
                     <div id="Admin" class="info-box user-item">
                         <div class="heading">
@@ -147,36 +111,18 @@
                                 <i class="fas fa-user-lock"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Admins</p>
-                            <p class="num" data-target="<?php 
-                                    echo count($adminData);
-                                ?>">
-                                999
-                            </p>
-                        </div>
-                        <a href="#admin">View More <i class="fas fa-arrow-right"></i></a>
+                  <a href="./admin.php">View More <i class="fas fa-arrow-right"></i></a>
                     </div>
 
                     <div id="Earning" class="info-box user-item">
                         <div class="heading">
-                            <h5>Earnings</h5>
+                            <h5>Sales</h5>
                             <div class="info">
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                         </div>
-                        <div class="info-content">
-                            <p>Total Earnings</p>
-                            <p class="num" data-target="<?php 
-                                    $result = mysqli_query($conn, 'SELECT SUM(booked_amount) AS value_sum FROM bookings'); 
-                                    $row = mysqli_fetch_assoc($result); 
-                                    $sum = $row['value_sum'];
-                                    echo $sum;
-                                ?>">
-                                999
-                            </p>
-                        </div>
-                        <a href="#">View More <i class="fas fa-arrow-right"></i></a>
+
+                        <a href="./sales.php">View More <i class="fas fa-arrow-right"></i></a>
                     </div>
 
                 </div>
@@ -200,10 +146,11 @@
                         }
                     ?>
                 </div>
+<p></p>
             </section>
                 <footer>
                     <p>
-                        <i class="far fa-copyright"></i> <?php echo date('Y');?> - Simple Bus Ticket Booking System | Made with &#10084;&#65039; by Ashwin Anil
+                        <i class="far fa-copyright"></i> <?php echo date('Y');?> - Online Bus Ticket Booking System | Made with &#10084;&#65039; by Ritesah, Tapaswini, Tirzah
                         </p>
                 </footer>
         </div>

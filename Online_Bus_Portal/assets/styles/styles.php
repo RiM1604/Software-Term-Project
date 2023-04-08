@@ -98,7 +98,11 @@
     /* Alert Message on top of the header */
     .alert{
         z-index: 3;
-        border-radius: 0px;
+        border-radius: 1px;
+        border: 2px solid red;
+        background-color: lightorange ;
+        position: relative;
+        align-items: center;
     }
 
 

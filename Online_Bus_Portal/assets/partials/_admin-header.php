@@ -30,13 +30,13 @@
     </header> -->
     <main id="container">
         <div id="sidebar">
-            <h4><i class="fas fa-bus"></i> SBTBS</h4>
+            <h4><i class="fas fa-bus"></i> OBTBS</h4>
             <div>
                 <img class="adminDp" src="../assets/img/userav-min.png" height="125px" alt="Admin Profile Pic">
                 <p>
                     <?php  echo '@'.$user_name;  ?>
                 </p>
-                <p>System Administrator</p>
+                <p>Administrator</p>
             </div>
             <ul id="options">
                 <li class="option <?php if($page=='dashboard'){ echo 'active';}?>"> 
@@ -72,11 +72,17 @@
                     <i class="fas fa-th"></i> Seats
                     </a>
                 </li>
-                <li class="option <?php if($page=='signup'){ echo 'active';}?>">
-                    <a href="./signup.php">
-                    <i class="fas fa-user-lock"></i> Add New Admin        
-                    </a>
-                </li>
+
+<li class="option <?php if($page=='seat'){ echo 'active';}?>">
+    <a href="./sales.php">
+    <i class="fas fa-th"></i> Sales
+    </a>
+</li>
+<li class="option <?php if($page=='seat'){ echo 'active';}?>">
+    <a href="./admin.php">
+    <i class="fas fa-th"></i> Admins
+    </a>
+</li>
             </ul>
         </div>
         <div id="main-content">

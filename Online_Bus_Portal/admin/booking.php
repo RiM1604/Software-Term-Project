@@ -226,8 +226,47 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>';
             }
+            
         }
+
+if( isset($_GET["name"]) || isset($_GET["contact"]))
+  {
+      $name = $_GET["name"];
+      $contact = $_GET["contact"];
+      $sql = "SELECT * FROM customers WHERE 1=1 ";
+
+      if (!empty($name)) {
+          $sql .= " AND customer_name = '$name'";
+      }
+
+      if (!empty($contact)) {
+          $sql .= " AND customer_phone = '$contact'";
+      }
+      
+      $result = mysqli_query($conn, $sql);
+      
+      $num = mysqli_num_rows($result);
+      
+      if($num)
+          {
+              while($row = mysqli_fetch_assoc($result))
+                  {
+                      $customer_id = $row["customer_id"];
+                      $sql1 =  "SELECT * FROM bookings WHERE customer_id= '$customer_id' ";
+                  }
+     
+              
+  }
+      else{
+          echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+          <strong>Error!</strong> No results found!
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>';
+      }
+}
         ?>
+
+
         <?php
             $resultSql = "SELECT * FROM `bookings` ORDER BY booking_created DESC";
                             
@@ -246,11 +285,53 @@
                     </div>
                 </div>
             <?php }
-            else { ?>   
+            else { ?>
+                
             <section id="booking">
                 <div id="head">
                     <h4>Booking Status</h4>
                 </div>
+                
+                <form method="GET" style = " display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+    margin-top: 10px;
+  margin-right: 20px; " >
+                  <label for="name" style= " font-weight: bold;
+  
+  padding: 10px;
+  margin-top: 10px;
+  margin-right: 20px;">Name: </label>
+                  <input type="text" name="name" id="name"  placeholder="Enter Name" style= " padding: 10px;
+  margin : 10px;
+  border : 2px solid black;
+  border-radius: 5px;
+
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);">
+                  <br>
+                  <label for="contact" style = " font-weight: bold;
+  
+  padding: 10px;
+  margin-top: 10px;
+  margin-right: 20px;">Contact: </label>
+                  <input type="text" name="contact" id="contact"  placeholder="Enter Contact" style = "  padding: 10px;
+  margin: 10px;
+  border : 2px solid black;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);">
+                  <br>
+                  <input type="submit" value="Search" style = "  background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+      margin-left: 20px;
+">
+                </form>
+                      
                 <div id="booking-results">
                     <div>
                         <button id="add-button" class="button btn-sm"type="button"data-bs-toggle="modal" data-bs-target="#addModal">Add Bookings<i class="fas fa-plus"></i></button>
@@ -368,6 +449,8 @@
             <?php } ?> 
         </div>
     </main>
+
+
     <!-- Requiring _getJSON.php-->
     <!-- Will have access to variables 
         1. routeJson

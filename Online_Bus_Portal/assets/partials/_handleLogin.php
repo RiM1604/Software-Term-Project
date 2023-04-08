@@ -3,7 +3,7 @@
     $conn = db_connect();
 
     if(!$conn)
-        die("Oh Shit!! Connection Failed");
+        die("Oh Shoot!! Connection Failed");
 
     if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"]))
     {
@@ -22,13 +22,13 @@
                 $_SESSION["loggedIn"] = true;
                 $_SESSION["user_id"] = $row["user_id"];
 
-                header("Location: ../../admin/dashboard.php");
+                header("location: ../../admin/dashboard.php");
                 exit;
             }
             
             // Login failure
             $error = true;
-            header("Location: index.php?error=$error");
+            header("location: index.php?error=$error");
         }
     }
 ?>

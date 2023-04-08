@@ -42,44 +42,42 @@
                  Check if the $_POST key 'submit' exists
                 */
                 // Should be validated client-side
-                $viaCities = strtoupper($_POST["viaCities"]);
+                
+                $viaCities = strtoupper($_POST["from"].",".$_POST["to"]);
                 $cost = $_POST["stepCost"];
                 $deptime = $_POST["dep_time"];
                 $depdate = $_POST["dep_date"];
                 $busno = $_POST["busno"];
                 $route_exists = exist_routes($conn,$viaCities,$depdate, $deptime);
                 $route_added = false;
-        
+         
+                if(!$cost) $cost = 0 ;
+                if(!$deptime || !$depdate || !$busno)
+                    {
+                        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong> Departure Date, Departure Time, Bus Number should not be empty!.  Route is not added!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>';
+                    }
+                else {
                 if(!$route_exists)
                 {
                     // Route is unique, proceed
-                    $sql = "INSERT INTO `routes` (`route_cities`,
-                     `bus_no`, 
-                     `route_dep_date`,
-                     `route_dep_time`, `route_step_cost`, `route_created`) VALUES ('$viaCities','$busno', '$depdate','$deptime', '$cost', current_timestamp());";
-                    $result = mysqli_query($conn, $sql);
-                    
-                    // Gives back the Auto Increment id
                     $autoInc_id = mysqli_insert_id($conn);
-                    // If the id exists then, 
-                    if($autoInc_id)
-                    {
-                        $code = rand(1,99999);
-                        // Generates the unique userid
-                        $route_id = "RT-".$code.$autoInc_id;
-                        
-                        $query = "UPDATE `routes` SET `route_id` = '$route_id' WHERE `routes`.`id` = $autoInc_id;";
-                        $queryResult = mysqli_query($conn, $query);
-                        if(!$queryResult)
-                            echo "Not Working";
-                    }
+                    $code = rand(1, 99999);
+                    $route_id = "RT-".$code.$autoInc_id;
                     
-                    if($result)
-                    {
-                        $route_added = true;
-                        // The bus is now assigned, updating uses table
+                    $sql = "INSERT INTO `routes` (`route_id`, `bus_no`, `route_cities`,
+                     `route_dep_date`,
+                     `route_dep_time`, `route_step_cost`, `route_created`) VALUES ('$route_id', '$busno', '$viaCities', '$depdate','$deptime', '$cost', current_timestamp());";
+                    $result = mysqli_query($conn, $sql);
+                    if(!$result) {
+                        // Handle errors
+                        echo "Error: " . mysqli_error($conn);
+                    } else {  $route_added = true;
                         bus_assign($conn, $busno);
                     }
+                  
                 }
     
                 if($route_added)
@@ -99,6 +97,7 @@
                     </div>';
                 }
             }
+        }
             if(isset($_POST["edit"]))
             {
                 // EDIT ROUTES
@@ -207,7 +206,160 @@
                 </div>';
             }
         }
-        ?>    
+     
+    if(isset($_GET["viaCities"]) && isset($_GET["busno"]) && isset($_GET["dep_date"]) && isset($_GET["dep_time"]) && isset($_GET["cost"]))
+{
+    
+    $via_cities = $_GET["viaCities"];
+    $bus_no = $_GET["busno"];
+    $dep_date = $_GET["dep_date"];
+    $dep_time = $_GET["dep_time"];
+    $cost = $_GET["cost"];
+    
+    $sql = "SELECT * FROM routes WHERE 1=1";
+    if (!empty($via_cities)) {
+         $sql.= " AND route_cities = '$via_cities'";
+    }
+    if (!empty($bus_no)) {
+        $sql .= " AND bus_no = '$bus_no'";
+    }
+    if (!empty($dep_date)) {
+        $sql .= " AND route_dep_date = '$dep_date'";
+    }
+    if (!empty($dep_time)) {
+        $sql .= " AND route_dep_time = '$dep_time'";
+    }
+    if (!empty($cost)) {
+        $sql .= " AND route_step_cost = '$cost'";
+    }
+    
+    
+    $result = mysqli_query($conn, $sql);
+    $num = mysqli_num_rows($result);
+    
+    if($num)
+        {
+            ?>
+            <a href="route.php" class="btn btn-primary">Back</a>
+            <p></p>
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <th>ID</th>
+                    <th>Via Cities</th>
+                    <th>Bus</th>
+                    <th>Departure Date</th>
+                    <th>Departure Time</th>
+                    <th>Cost</th>
+                    <th>Actions</th>
+                </thead>
+                <?php
+                    while($row = mysqli_fetch_assoc($result))
+                    {
+                           
+                        $id = $row["id"];
+                        $route_id = $row["route_id"];
+                        $route_cities = $row["route_cities"];
+                        $route_dep_time = $row["route_dep_time"];
+                        $route_dep_date = $row["route_dep_date"];
+                        $route_step_cost = $row["route_step_cost"];
+                        $bus_no = $row["bus_no"];
+                            ?>
+                        <tr>
+                            <td>
+                                <?php
+                                    echo $route_id;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $route_cities;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $bus_no;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $route_dep_date;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $route_dep_time;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo '$'.$route_step_cost;?>
+                            </td>
+                            <td>
+                                <?php echo '$'.$
+                            </td>
+                        </tr>
+                    <?php
+                    }
+                ?>
+            </table>
+            
+      <?php  }
+    else{
+        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> No Matching Records!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    }
+}
+        ?>
+        
+<form method="GET" style = " display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 10px;  ">
+  <label for="viaCities" style= "margin-right: 5px; " >Via Cities</label>
+  <input type="text" name="viaCities" id="viaCities" placeholder="Comma Sepearted list" style = "
+           padding: 5px;
+     margin: 5px;
+       border-radius: 5px;
+       border: 1px solid #ccc;
+       
+">
+  <br>
+  <label for="busno" style= "margin-right: 5px;">Bus Number</label>
+  <input type="text" name="busno" id="busno"  placeholder="Bus Number" style = "  margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    "
+  <br>
+  <label for="date" style= "margin-right: 5px;">Departure Date</label>
+  <input type="date" name="dep_date" id="date" style = "  margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+   " >
+  <br>
+ <label for="time" style= "margin-right: 5px;">Departure Time</label>
+ <input type="time" name="dep_time" id="time" style = "   margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    ">
+ <br>
+<label for="stepCost" style= "margin-right: 5px;">Cost</label>
+<input type="stepCost" name="cost" id="stepCost" placeholder="Cost" style = "   margin: 5px;
+   padding: 5px;
+   border-radius: 5px;
+   border: 2px solid #ccc;
+   ">
+<br>
+  <input type="submit" value="Search" style = " background-color: #4CAF50;
+    color: white;
+       border-radius: 5px;
+    cursor: pointer; ">
+</form>
+
         <?php
             $resultSql = "SELECT * FROM `routes` ORDER BY route_created DESC";
                             
@@ -334,12 +486,18 @@
                     <div class="modal-body">
                         <form id="addRouteForm" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
                             <div class="mb-3">
-                                    <label for="viaCities" class="form-label">Via Cities</label>
-                                <input type="text" class="form-control" id="viaCities" name="viaCities" placeholder="Comma Separated List" required>
+                                    <label for="from" class="form-label">From</label>
+                                <input type="text" class="form-control" id="viaCities" name="from" placeholder="From Destination" required>
                                 <span id="error">
-
                                 </span>
                             </div>
+<div class="mb-3">
+        <label for="to" class="form-label">To</label>
+    <input type="text" class="form-control" id="viaCities" name="to" placeholder="To Destination" required>
+    <span id="error">
+
+    </span>
+</div>
                             <input type="hidden" id="busJson" name="busJson" value='<?php echo $busJson; ?>'>
                             <div class="mb-3">
                                 <label for="busno" class="form-label">Bus Number</label>
