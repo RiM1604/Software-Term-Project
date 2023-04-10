@@ -1,6 +1,7 @@
 <!-- Show these admin pages only when the admin is logged in -->
 <?php  require '../assets/partials/_userlogin-check.php';   ?>
-
+<!-- session start for user details in ticket booking autofill -->
+<?php session_start()?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,23 +27,29 @@
 <body>
     <!-- Requiring the admin header files -->
     <?php require '../assets/partials/_user-header.php';?>
+    <?php echo $user_name?>
 <!-- Add, Edit and Delete Bookings -->
 <?php
         /*
             1. Check if an user is logged in
             2. Check if the request method is POST
-        */
-        if($user_loggedIn && $_SERVER["REQUEST_METHOD"] == "POST")
-        {
+            */
+            $customer_name = $user_name;
+            echo $customer_name;
+            $sql= "SELECT * FROM `customers` WHERE customer_name = '$customer_name'";
+            echo "asdfdf".$customer_name;
+            $result= mysqli_query($conn,$sql);
+            $row = mysqli_fetch_assoc($result);
+            $customer_id = $row["customer_id"];
+            $customer_phone = $row["customer_phone"];
 
+            if($user_loggedIn && $_SERVER["REQUEST_METHOD"] == "POST")
+            {  
 
             if(isset($_POST["search"]))
             {
                 $destination= $_POST["destinationSearch"];
                 $start= $_POST["sourceSearch"];
-                $search_result= "SELECT * FROM `routes` WHERE `route_cities`='$start,$destination'; ";
-                $row= mysqli_fetch_assoc(mysqli_query($conn,$search_result));
-                $row['bus_no']  ;
             }
             if(isset($_POST["submit"]))
             {
@@ -56,15 +63,21 @@
                 // echo "</pre>";
                 // die;
                 //adding booking with info for each booking
-                $customer_id = $_POST["cid"];
-                $customer_name = $_POST["cname"];
-                $customer_phone = $_POST["cphone"];
                 $route_id = $_POST["route_id"];
                 $route_source = $_POST["sourceSearch"];
                 $route_destination = $_POST["destinationSearch"];
                 $route = $route_source . " &rarr; " . $route_destination;
                 $booked_seat = $_POST["seatInput"];
                 $amount = $_POST["bookAmount"];
+                echo $customer_id." ";
+                echo $customer_name." ";
+                echo $customer_phone." ";
+                echo $route_id." ";
+                echo $route_source." ";
+                echo $route_destination." ";
+                echo $route." ";
+                echo $booked_seat." ";
+                echo $amount." ";
                 // $dep_timing = $_POST["dep_timing"];
 
                 $booking_exists = exist_booking($conn,$customer_id,$route_id);
@@ -73,11 +86,12 @@
                 if(!$booking_exists)
                 {
                     // Route is unique, proceed
-                    $sql = "INSERT INTO `bookings` (`customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('$customer_id', '$route_id','$route', '$amount', '$booked_seat', current_timestamp());";
-
+                    $sql = "INSERT INTO `bookings` (`customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('{$customer_id}', '{$route_id}','{$route}', '{$amount}', '{$booked_seat}', current_timestamp());";
                     $result = mysqli_query($conn, $sql);
+                    echo $sql;
                     // Gives back the Auto Increment id
                     $autoInc_id = mysqli_insert_id($conn);
+                    echo "autoInc_id=".$autoInc_id;
                     // If the id exists then, 
                     if($autoInc_id)
                     {
@@ -99,6 +113,8 @@
                     if($result)
                         $booking_added = true;
                 }
+                echo "booking_id=".$booking_id;
+                echo "result=".$result;
     
                 if($booking_added)
                 {
@@ -268,14 +284,17 @@
         $sql .= " AND route_step_cost = '$cost'";
     }
     
-    
+    $sql.=";";
     $result = mysqli_query($conn, $sql);
     $num = mysqli_num_rows($result);
+    echo $sql;
     
+    // // num not there
+    // displaying all the searches for the user inputs
     if($num)
         {
             ?>
-            <a href="route.php" class="btn btn-primary">Back</a>
+            <a href="user_booking.php" class="btn btn-primary">Back</a>
             <p></p>
             <table class="table table-hover table-bordered">
                 <thead>
@@ -352,6 +371,7 @@
     }
 
         ?>
+        <!-- getting inputs for search based on the inputs from the user -->
     <form method="GET" style = " display: flex;
   flex-direction: row;
   align-items: center;
@@ -402,9 +422,9 @@
 
 
 
-
+<!-- Displaying all bookings for the user without input from user -->
         <?php
-            $resultSql = "SELECT * FROM `bookings` ORDER BY booking_created DESC";
+            $resultSql = "SELECT * FROM `bookings` WHERE `customer_id`='$customer_id'";
                             
             $resultSqlResult = mysqli_query($conn, $resultSql);
 
@@ -452,9 +472,9 @@
 
                                 $pnr = $row["booking_id"];
 
-                                $customer_name = get_from_table($conn, "customers","customer_id", $customer_id, "customer_name");
+                                // $customer_name = get_from_table($conn, "customers","customer_id", $customer_id, "customer_name");
                                 
-                                $customer_phone = get_from_table($conn,"customers","customer_id", $customer_id, "customer_phone");
+                                // $customer_phone = get_from_table($conn,"customers","customer_id", $customer_id, "customer_phone");
 
                                 $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
 
@@ -502,17 +522,14 @@
                                 ?>
                             </td>
                             <td>
-                            <button class="button btn-sm edit-button" data-link="<?php echo $_SERVER['REQUEST_URI']; ?>" data-customerid="<?php 
-                                                echo $customer_id;?>" data-id="<?php 
-                                                echo $id;?>"
-                                                >Edit Destination </button>
+                               <button id="add-button" class="edit" type="button" data-bs-toggle="modal" data-bs-target="#addModal">Edit<i class="fas fa-plus"></i></button>
                                 <button class="button delete-button btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" 
                                 data-id="<?php 
                                                 echo $id;?>" data-bookedseat="<?php 
                                                 echo $booked_seat;
                                             ?>" data-routeid="<?php 
                                             echo $route_id;
-                                        ?>">Cancel Booking</button>
+                                        ?>"> Delete</button>
                             </td>
                         </tr>
                         <?php 
@@ -542,7 +559,7 @@
                 <div class="modal-dialog modal-lg modal-dialog-scrollable">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Book Your Ticket</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Booking Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -553,27 +570,30 @@
                             <input type="hidden" id="customerJson" name="customerJson" value='<?php echo $customerJson; ?>'>
                             <!-- Passing Seat JSON -->
                             <input type="hidden" id="seatJson" name="seatJson" value='<?php echo $seatJson; ?>'>
-
+                            <!-- passing it so that these are available in the js file -->
                             <div>
-                                <!-- Search Functionality -->
+                                <!-- autofill Functionality -->
                                 <!--!!!!!!! Here customer name and id are being fixed after the input of atleast one 
                                 booking is given should change that and fix it to one customer per userpage-->
+                                <div class="mb-3">
+                                <label for="cid" class="form-label">Customer ID</label>
+                                <!-- Search Functionality -->
                                 <div class="searchQuery">
-                                    <input type="hidden" class="form-control searchInput" id="cid" name="cid" value="<?php echo $customer_id?>" readonly>
+                                    <input type="text" class="form-control searchInput" id="cid" name="cid" value="<?php echo $customer_id?>" readonly>
                                     <div class="sugg">
-                                        
+                                        <?php echo $customer_id ?>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="cname" class="form-label">Customer Name</label>
-                                <input type="text" class="form-control" id="cname" name="cname" value="<?php echo $customer_name?>"readonly>
-                                <div class="sugg">Name same as the user</div>
+                                <input type="text" class="form-control searchInput" id="cname" name="cname" value="<?php echo $customer_name?>"readonly>
+                                <div class="sugg"><?php echo $customer_name?></div>
                             </div>
                             <div class="mb-3">
                                 <label for="cphone" class="form-label">Contact Number</label>
                                 <input type="tel" class="form-control" id="cphone" name="cphone" value="<?php echo $customer_phone?>"readonly>
-                                <div class="sugg">Number same as the user</div>
+                                <div class="sugg"><?php echo $customer_phone?></div>
                             </div>
                             <div class="mb-3">
                                 <label for="routeSearch" class="form-label">Route</label>
@@ -699,7 +719,7 @@
                 </div>
         </div>
         <!-- Delete Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+       <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
@@ -721,13 +741,13 @@
                 </form>
             </div>
             <div class="modal-footer d-flex justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Edit</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" form="delete-form" name="delete" class="btn btn-danger">Delete</button>
             </div>
             </div>
         </div>
     </div>
-    <script src="../assets/scripts/admin_booking.js"></script>
+    <script src="../assets/scripts/user_booking.js"></script>
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 </body>

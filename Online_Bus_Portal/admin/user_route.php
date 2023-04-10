@@ -207,7 +207,160 @@
                 </div>';
             }
         }
-        ?>    
+        
+        if(isset($_GET["viaCities"]) && isset($_GET["busno"]) && isset($_GET["dep_date"]) && isset($_GET["dep_time"]) && isset($_GET["cost"]))
+{
+    
+    $via_cities = $_GET["viaCities"];
+    $bus_no = $_GET["busno"];
+    $dep_date = $_GET["dep_date"];
+    $dep_time = $_GET["dep_time"];
+    $cost = $_GET["cost"];
+    
+    $sql = "SELECT * FROM routes WHERE 1=1";
+    if (!empty($via_cities)) {
+         $sql.= " AND route_cities = '$via_cities'";
+    }
+    if (!empty($bus_no)) {
+        $sql .= " AND bus_no = '$bus_no'";
+    }
+    if (!empty($dep_date)) {
+        $sql .= " AND route_dep_date = '$dep_date'";
+    }
+    if (!empty($dep_time)) {
+        $sql .= " AND route_dep_time = '$dep_time'";
+    }
+    if (!empty($cost)) {
+        $sql .= " AND route_step_cost = '$cost'";
+    }
+
+     $result = mysqli_query($conn, $sql);
+    $num = mysqli_num_rows($result);
+
+
+     if($num)
+        {
+            ?>
+            <a href="user_route.php" class="btn btn-primary">Back</a>
+            <p></p>
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <th>ID</th>
+                    <th>Via Cities</th>
+                    <th>Bus</th>
+                    <th>Departure Date</th>
+                    <th>Departure Time</th>
+                    <th>Cost</th>
+                </thead>
+                <?php
+                    while($row = mysqli_fetch_assoc($result))
+                    {
+                           
+                        $id = $row["id"];
+                        $route_id = $row["route_id"];
+                        $route_cities = $row["route_cities"];
+                        $route_dep_time = $row["route_dep_time"];
+                        $route_dep_date = $row["route_dep_date"];
+                        $route_step_cost = $row["route_step_cost"];
+                        $bus_no = $row["bus_no"];
+                            ?>
+                        <tr>
+                            <td>
+                                <?php
+                                    echo $route_id;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $route_cities;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $bus_no;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $route_dep_date;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo $route_dep_time;
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                    echo '$'.$route_step_cost;
+                                ?>
+                            </td>
+                        </tr>
+                    <?php
+                    }
+                ?>
+            </table>
+            
+      <?php  }
+    else{
+        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> No Matching Records!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>';
+    }
+}
+?>  
+<form method="GET" style = " display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 10px;  ">
+  <label for="viaCities" style= "margin-right: 5px; " >Via Cities</label>
+  <input type="text" name="viaCities" id="viaCities" placeholder="Comma Sepearted list" style = "
+           padding: 5px;
+     margin: 5px;
+       border-radius: 5px;
+       border: 1px solid #ccc;
+       
+">
+  <br>
+  <label for="busno" style= "margin-right: 5px;">Bus Number</label>
+  <input type="text" name="busno" id="busno"  placeholder="Bus Number" style = "  margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    "
+  <br>
+  <label for="date" style= "margin-right: 5px;">Departure Date</label>
+  <input type="date" name="dep_date" id="date" style = "  margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+   " >
+  <br>
+ <label for="time" style= "margin-right: 5px;">Departure Time</label>
+ <input type="time" name="dep_time" id="time" style = "   margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    ">
+ <br>
+<label for="stepCost" style= "margin-right: 5px;">Cost</label>
+<input type="stepCost" name="cost" id="stepCost" placeholder="Cost" style = "   margin: 5px;
+   padding: 5px;
+   border-radius: 5px;
+   border: 2px solid #ccc;
+   ">
+<br>
+  <input type="submit" value="Search" style = " background-color: #4CAF50;
+    color: white;
+       border-radius: 5px;
+    cursor: pointer; ">
+</form>
+
+
+
+
+        
         <?php
             $resultSql = "SELECT * FROM `routes` ORDER BY route_created DESC";
                             
@@ -232,9 +385,9 @@
                         <h4>Route Status</h4>
                     </div>
                     <div id="route-results">
-                        <div>
+                        <!-- <div>
                             <button id="add-button" class="button btn-sm"type="button"data-bs-toggle="modal" data-bs-target="#addModal">Add Route Details <i class="fas fa-plus"></i></button>
-                        </div>
+                        </div> -->
                         <table class="table table-hover table-bordered">
                             <thead>
                                 <th>ID</th>
@@ -243,7 +396,6 @@
                                 <th>Departure Date</th>
                                 <th>Departure Time</th>
                                 <th>Cost</th>
-                                <th>Actions</th>
                             </thead>
                             <?php
                                 while($row = mysqli_fetch_assoc($resultSqlResult))
@@ -288,21 +440,6 @@
                                         <td>
                                             <?php 
                                                 echo '$'.$route_step_cost;?>
-                                        </td>
-                                        <td>
-                                            <button class="button edit-button " data-link="<?php echo $_SERVER['REQUEST_URI']; ?>" data-id="<?php 
-                                                echo $id;?>" data-cities="<?php 
-                                                echo $route_cities;?>" data-cost="<?php 
-                                                echo $route_step_cost;?>" data-date="<?php 
-                                                echo $route_dep_date;
-                                            ?>" data-time="<?php 
-                                            echo $route_dep_time;
-                                            ?>" data-busno="<?php 
-                                            echo $bus_no;
-                                            ?>"
-                                            >Edit</button>
-                                            <button class="button delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="<?php 
-                                                echo $id;?>">Delete</button>
                                         </td>
                                     </tr>
                                 <?php 

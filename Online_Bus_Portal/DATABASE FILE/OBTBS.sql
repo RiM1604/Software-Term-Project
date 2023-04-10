@@ -1,4 +1,4 @@
--- phpMyAdmin SQL Dump
+                                -- phpMyAdmin SQL Dump
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `bookings` (
   `id` int(100) NOT NULL,
-  `booking_id` varchar(255) NOT NULL,
+  `booking_id` varchar(255) NOT NULL DEFAULT '',
   `customer_id` varchar(255) NOT NULL,
   `route_id` varchar(255) NOT NULL,
   `customer_route` varchar(200) NOT NULL,
@@ -162,7 +162,7 @@ CREATE TABLE `seats` (
 -- Dumping data for table `seats`
 --
 
-INSERT INTO `seats` (`bus_no`, `seat_booked`) VALUES
+INSERT INTO `seats` (`route_id`, `seat_booked`) VALUES
 ('ABC0010', NULL),
 ('BC35671', NULL),
 ('BC35676', NULL),
@@ -193,7 +193,7 @@ CREATE TABLE `users` (
   `user_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
+--  
 -- Dumping data for table `users`
 --
 

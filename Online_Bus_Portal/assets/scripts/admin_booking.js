@@ -17,7 +17,7 @@ console.log(routeData, customerData, seatData);
 const bookingBody = document.body;
 
 bookingBody.addEventListener("click", listenForSearches);
-
+//customer filling based on suggestions click similarily for route, source, destination
 function listenForSearches(evt) {
   if (evt.target.className.includes("searchInput")) {
     const searchInput = evt.target;
@@ -199,18 +199,10 @@ function lockSuggestion(evt) {
     evt.target.innerText = evt.target.firstElementChild.innerText;
 
     // To Color the not Available Seats in this route
-    const route_busNo = routeData.find(({ route_id: id }) => {
+    const seatsBooked = routeData.find(({ route_id: id }) => {
       return id === route_id
-    }).bus_no;
-
-    console.log(seatData.find(({ bus_no }) => {
-      console.log(bus_no, route_busNo);
-      return bus_no === route_busNo;
-    }));
-    let seatsBooked = seatData.find(({ bus_no }) => {
-      console.log(bus_no, route_busNo);
-      return bus_no === route_busNo;
     }).seat_booked;
+
 
     // If already booked seats exists
     if (seatsBooked) {

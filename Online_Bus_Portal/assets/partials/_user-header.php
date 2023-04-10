@@ -1,4 +1,5 @@
 <?php
+    session_start();
     require_once '_user_handleLogin.php';
     require_once '_functions.php';
     $conn = db_connect();

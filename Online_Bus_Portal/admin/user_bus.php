@@ -172,6 +172,7 @@
             }
         }
         ?>
+
         <?php
             $resultSql = "SELECT * FROM `buses` ORDER BY bus_created DESC";
                             
@@ -197,15 +198,68 @@
                     <h4>Bus Status</h4>
                 </div>
                 <div id="bus-results">
-                    <div>
-                        <button id="add-button" class="button btn-sm" type="button"data-bs-toggle="modal" data-bs-target="#addModal">Add Bus Details <i class="fas fa-plus"></i></button>
+<form class="form-inline my-2 my-lg-0" method="GET">
+                  <div class="input-group">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search Bus Number" aria-label="Search" name="q">
+                    <div class="input-group-append">
+                      <button class="btn btn-success" type="submit">Search</button>
                     </div>
+                  </div>
+                </form>
+                
+                <?php
+                if(isset($_GET['q']))
+                {
+                    $bus = $_GET['q'] ;
+                    $sql = "SELECT * FROM `buses` WHERE `buses`.`bus_no` = '$bus'";
+                    // Execute the query
+                    $result = mysqli_query($conn, $sql);
+
+                    // Display the results in a table
+                    if(mysqli_num_rows($result) > 0) {
+                        
+                        echo '<table class="table table-hover table-bordered table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Bus Number</th>
+                                    <th scope="col">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+
+                        $count = 0;
+                        while($row = mysqli_fetch_assoc($result)) {
+                            $id = $row['id'];
+                            $busno = $row['bus_no'];
+                            $buscreated = $row['bus_created'];
+                            $count++;
+
+                            echo '<tr>
+                                <th scope="row">' . $count . '</th>
+                                <td>' . $busno . '</td>
+                                <td>' . $buscreated . '</td>
+                            </tr>';
+                        }
+
+                        echo '</tbody></table>';
+                        echo '<a href="user_bus.php" class="btn btn-primary">Back</a>' ;
+                        echo '</div>';
+                    }
                     
+                    else {
+                        echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                             No Buses Found ' ;
+                          echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' ;
+                        echo '</div>';
+                    }
+                }
+               
+?>
                     <table class="table table-hover table-bordered">
                         <thead>
                             <th>#</th>
                             <th>Bus Number</th>
-                            <th>Actions</th>
                         </thead>
                         <?php
                             $ser_no = 0;
@@ -229,14 +283,6 @@
                                 <?php
                                     echo $busno;
                                 ?>
-                            </td>
-                            <td>
-                            <button class="button edit-button " data-link="<?php echo $_SERVER['REQUEST_URI']; ?>" data-id="<?php 
-                                                echo $id;?>" data-busno="<?php 
-                                                echo $busno;?>"
-                                                >Edit</button>
-                                            <button class="button delete-button" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="<?php 
-                                                echo $id;?>">Delete</button>
                             </td>
                         </tr>
                         <?php 

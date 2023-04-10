@@ -58,12 +58,12 @@
 
                 $booking_exists = exist_booking($conn,$customer_id,$route_id);
                 $booking_added = false;
-        
+                
                 if(!$booking_exists)
                 {
                     // Route is unique, proceed
+                    echo $sql;
                     $sql = "INSERT INTO `bookings` (`customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('$customer_id', '$route_id','$route', '$amount', '$booked_seat', current_timestamp());";
-
                     $result = mysqli_query($conn, $sql);
                     // Gives back the Auto Increment id
                     $autoInc_id = mysqli_insert_id($conn);
