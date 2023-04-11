@@ -36,10 +36,10 @@
             
         }else
         {
-            header("location: ./user_username_not_found.php");
+            //header("location: ./user_username_not_found.php");
+            header("Location: ../../admin/user_dashboard.php");
 
         }
-        // header("Location: ../../admin/user_dashboard.php");
         
     }
 ?>

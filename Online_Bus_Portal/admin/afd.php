@@ -32,16 +32,10 @@
             1. Check if an admin is logged in
             2. Check if the request method is POST
         */
-        //defaulted values
-        
-        
-
-        
 
         $customer_name=$user_name;
-        $customer_id=$user_id;
-        $customer_phone=$user_phone;
-        if($user_loggedIn && $_SERVER["REQUEST_METHOD"] == "POST")
+        echo $user_name;
+        if($loggedIn && $_SERVER["REQUEST_METHOD"] == "POST")
         {
             if(isset($_POST["submit"]))
             {
@@ -54,11 +48,11 @@
                 // var_export($_POST);
                 // echo "</pre>";
                 // die;
-                // $customer_id = $_POST["cid"];
+                $customer_id = $_POST["cid"];
                 
                 $sql = " SELECT * FROM customers WHERE customer_id = '$customer_id';" ;
                 $result = mysqli_query($conn, $sql);
-                echo $sql;
+                
                 $num = mysqli_num_rows($result);
                 
                 if(!$num)
@@ -71,7 +65,8 @@
                             
                     }
                 else {
-                // $customer_name = $_POST["cname"];
+                $customer_name = $_POST["cname"];
+                $customer_phone = $_POST["cphone"];
                 $route_id = $_POST["route_id"];
                     
                 $sql = " SELECT * FROM routes WHERE route_id = '$route_id';" ;
@@ -80,16 +75,16 @@
                     $num = mysqli_num_rows($result);
                     if(!$num)
                         {
-                            
+                           
                             echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
                             <strong>Error!</strong> Booking can be made on existing Routes!
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>';
                             
                         }
-                        else {
-                            $route_source = $_POST["sourceSearch"];
-                            $route_destination = $_POST["destinationSearch"];
+                else {
+                $route_source = $_POST["sourceSearch"];
+                $route_destination = $_POST["destinationSearch"];
                 $route = $route_source . " &rarr; " . $route_destination;
                 $booked_seat = $_POST["seatInput"];
                 $amount = $_POST["bookAmount"];
@@ -97,36 +92,22 @@
 
                 $booking_exists = exist_booking($conn,$customer_id,$route_id);
                 $booking_added = false;
-            
-                $sql2 = "SELECT * FROM `seats` WHERE `route_id` = '$route_id'";
-                $result2 = mysqli_query($conn, $sql2);
-                $row2=mysqli_fetch_assoc($result2);
-                $seats_filled= explode(",",$row2['seats_booked']);
-                foreach($seats_filled as $single_seat)
-                {
-                    if($single_seat==$booked_seat)
-                    {
-                        $same_seat = true;
-                        break;
-                    }
-                }
                 
-                
-                if(!$booking_exists || !$same_seat)
+                if(!$booking_exists)
                 {
                     
                     // Gives back the Auto Increment id
                     $autoInc_id = mysqli_insert_id($conn);
                     
-                    $key = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                        $key = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                         $code = "";
                         for($i = 0; $i < 5; ++$i)
-                        $code .= $key[rand(0,strlen($key) - 1)];
+                            $code .= $key[rand(0,strlen($key) - 1)];
                         
                         // Generates the unique bookingid
                         $booking_id = $code.$autoInc_id;
                         
-                        $sql = "INSERT INTO `bookings` (`booking_id`, `customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('$booking_id','$customer_id', '$route_id','$route', '$amount', '$booked_seat', current_timestamp());";
+                    $sql = "INSERT INTO `bookings` (`booking_id`, `customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('$booking_id','$customer_id', '$route_id','$route', '$amount', '$booked_seat', current_timestamp());";
                     $result = mysqli_query($conn, $sql);
 
                     if($result)
@@ -136,7 +117,7 @@
                         exit();
                     }
                 }
-                
+    
                 if($booking_added)
                 {
                     // Show success alert
@@ -144,7 +125,7 @@
                     <strong>Successful!</strong> Booking Added
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>';
-                    
+
                     // Update the Seats table
                    
                     $seats = get_from_table($conn, "seats", "route_id", $route_id, "seat_booked");
@@ -154,7 +135,7 @@
                     }
                     else
                         $seats = $booked_seat;
-                        
+
                     $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`route_id` = '$route_id';";
                     mysqli_query($conn, $updateSeatSql);
                 }
@@ -167,11 +148,11 @@
                 }
             }
         }
-    }
-    if(isset($_POST["delete"]))
-    {
-        // DELETE BOOKING
-        $id = $_POST["id"];
+                }
+            if(isset($_POST["delete"]))
+            {
+                // DELETE BOOKING
+                $id = $_POST["id"];
                 $route_id = $_POST["route_id"];
                 // Delete the booking with id => id
                 $deleteSql = "DELETE FROM `bookings` WHERE `bookings`.`id` = $id";
@@ -616,7 +597,7 @@ if( isset($_GET["name"]) || isset($_GET["contact"]))
                                 <label for="cid" class="form-label">Customer ID</label>
                                 <!-- Search Functionality -->
                                 <div class="searchQuery">
-                                    <input type="text" class="form-control searchInput" id="cid" name="cid" value="<?php echo $customer_id ?>" readonly>
+                                    <input type="text" class="form-control searchInput" id="cid" name="cid">
                                     <div class="sugg">
                                         
                                     </div>
@@ -624,11 +605,11 @@ if( isset($_GET["name"]) || isset($_GET["contact"]))
                             </div>
                             <div class="mb-3">
                                 <label for="cname" class="form-label">Customer Name</label>
-                                <input type="text" class="form-control" id="cname" name="cname" value="<?php echo $customer_name ?>"readonly>
+                                <input type="text" class="form-control" id="cname" name="cname" readonly>
                             </div>
                             <div class="mb-3">
                                 <label for="cphone" class="form-label">Contact Number</label>
-                                <input type="tel" class="form-control" id="cphone" name="cphone" value="<?php echo $customer_phone ?>" readonly>
+                                <input type="tel" class="form-control" id="cphone" name="cphone" readonly>
                             </div>
                             <div class="mb-3">
                                 <label for="routeSearch" class="form-label">Route</label>
@@ -782,7 +763,7 @@ if( isset($_GET["name"]) || isset($_GET["contact"]))
             </div>
         </div>
     </div>
-    <script src="../assets/scripts/user_booking.js"></script>
+    <script src="../assets/scripts/admin_booking.js"></script>
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 </body>

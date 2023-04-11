@@ -4,12 +4,13 @@
     require_once '_functions.php';
     $conn = db_connect();
     // Getting user details
-    $user_id = $_SESSION['user_id'];    
+    $user_id = $_SESSION['user_id'];  
     $sql = "SELECT * FROM customers WHERE customer_id = '$user_id';";
     $result = mysqli_query($conn, $sql);
     if($row = mysqli_fetch_assoc($result))
     {
         $user_name = $row['customer_name'];
+        $user_phone = $row['customer_phone'];  
     }
 ?>
 
@@ -33,7 +34,7 @@
             <div>
                 <img class="adminDp" src="../assets/img/userav-min.png" height="125px" alt="Admin Profile Pic">
                 <p>
-                    <?php  echo '@'.$user_name;  ?>
+                    <?php  echo '@'.$user_name; ?>
                 </p>
                 <p>Username</p>
             </div>
