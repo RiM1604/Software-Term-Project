@@ -6,7 +6,7 @@
         die("Oh Shit!! Connection Failed");
 
     if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["user_submit"]))
-    {
+    {                   
         $username = $_POST['user_username'];
         $password = $_POST['user_password'];
         $sql = "SELECT * FROM customers WHERE customer_name = '$username'";
@@ -28,12 +28,16 @@
             {
                 // Login failure
                 // echo "failed";
-                echo 'your entered password:'.$_POST['user_password'].' ';
+                header("location: ./user_password_mismatch.php");
                 echo 'required password:'.$row['customer_password'].' ';
                 // $error = true;
                 // header("Location: index.php?error=$error");    
             }
             
+        }else
+        {
+            header("location: ./user_username_not_found.php");
+
         }
         // header("Location: ../../admin/user_dashboard.php");
         

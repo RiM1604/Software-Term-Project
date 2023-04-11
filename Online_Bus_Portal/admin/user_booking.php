@@ -34,6 +34,8 @@
             1. Check if an user is logged in
             2. Check if the request method is POST
             */
+
+            //defaulting values to the customer
             $customer_name = $user_name;
             echo $customer_name;
             $sql= "SELECT * FROM `customers` WHERE customer_name = '$customer_name'";
@@ -82,8 +84,12 @@
 
                 $booking_exists = exist_booking($conn,$customer_id,$route_id);
                 $booking_added = false;
-        
-                if(!$booking_exists)
+                $same_seat = false;
+                // $same_seat= same_booking($conn,$route_id,$booked_seat);
+                echo $same_seat;
+                echo "working";
+                //here same customer booking the same bus case is not solved
+                if($customer_id)
                 {
                     // Route is unique, proceed
                     $sql = "INSERT INTO `bookings` (`customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('{$customer_id}', '{$route_id}','{$route}', '{$amount}', '{$booked_seat}', current_timestamp());";
@@ -112,6 +118,12 @@
 
                     if($result)
                         $booking_added = true;
+                }else
+                {
+                    echo'<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>ERROR!</strong> Booking already exists
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>';
                 }
                 echo "booking_id=".$booking_id;
                 echo "result=".$result;
@@ -125,8 +137,7 @@
                     </div>';
 
                     // Update the Seats table
-                    $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
-                    $seats = get_from_table($conn, "seats", "bus_no", $bus_no, "seat_booked");
+                    $seats = get_from_table($conn, "seats", "route_id", $route_id, "seat_booked");
                     if($seats)
                     {
                         $seats .= "," . $booked_seat;
@@ -134,7 +145,7 @@
                     else 
                         $seats = $booked_seat;
 
-                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`bus_no` = '$bus_no';";
+                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`route_id` = '$route_id';";
                     mysqli_query($conn, $updateSeatSql);
                 }
                 else{
@@ -230,7 +241,7 @@
 
                     // Update the Seats table
                     $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
-                    $seats = get_from_table($conn, "seats", "bus_no", $bus_no, "seat_booked");
+                    $seats = get_from_table($conn, "seats", "route_id", $route_id, "seat_booked");
 
                     // Extract the seat no. that needs to be deleted
                     $booked_seat = $_POST["booked_seat"];
@@ -240,7 +251,7 @@
                     array_splice($seats,$idx,1);
                     $seats = implode(",", $seats);
 
-                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`bus_no` = '$bus_no';";
+                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`route_id` = '$route_id';";
                     mysqli_query($conn, $updateSeatSql);
                 }
                 else{
@@ -555,6 +566,13 @@
     <!-- All Modals Here -->
     <!-- Add Booking Modal -->
     <!-- Modal for booking through book your ticket button-->
+
+
+
+
+
+
+    
    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-scrollable">
                     <div class="modal-content">
@@ -718,8 +736,9 @@
                     </div>
                 </div>
         </div>
+        
         <!-- Delete Modal -->
-       <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">

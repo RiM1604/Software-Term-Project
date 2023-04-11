@@ -46,9 +46,40 @@
                 // echo "</pre>";
                 // die;
                 $customer_id = $_POST["cid"];
+                
+                $sql = " SELECT * FROM customers WHERE customer_id = '$customer_id';" ;
+                $result = mysqli_query($conn, $sql);
+                
+                $num = mysqli_num_rows($result);
+                
+                if(!$num)
+                    {
+                    
+                            echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error!</strong> Booking can be made only for Customers!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>';
+                            
+                    }
+                else {
                 $customer_name = $_POST["cname"];
                 $customer_phone = $_POST["cphone"];
                 $route_id = $_POST["route_id"];
+                    
+                $sql = " SELECT * FROM routes WHERE route_id = '$route_id';" ;
+                    $result = mysqli_query($conn, $sql);
+                    
+                    $num = mysqli_num_rows($result);
+                    if(!$num)
+                        {
+                           
+                            echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error!</strong> Booking can be made on existing Routes!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>';
+                            
+                        }
+                else {
                 $route_source = $_POST["sourceSearch"];
                 $route_destination = $_POST["destinationSearch"];
                 $route = $route_source . " &rarr; " . $route_destination;
@@ -61,15 +92,10 @@
                 
                 if(!$booking_exists)
                 {
-                    // Route is unique, proceed
-                    echo $sql;
-                    $sql = "INSERT INTO `bookings` (`customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('$customer_id', '$route_id','$route', '$amount', '$booked_seat', current_timestamp());";
-                    $result = mysqli_query($conn, $sql);
+                    
                     // Gives back the Auto Increment id
                     $autoInc_id = mysqli_insert_id($conn);
-                    // If the id exists then, 
-                    if($autoInc_id)
-                    {
+                    
                         $key = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                         $code = "";
                         for($i = 0; $i < 5; ++$i)
@@ -78,15 +104,15 @@
                         // Generates the unique bookingid
                         $booking_id = $code.$autoInc_id;
                         
-                        $query = "UPDATE `bookings` SET `booking_id` = '$booking_id' WHERE `bookings`.`id` = $autoInc_id;";
-                        $queryResult = mysqli_query($conn, $query);
-
-                        if(!$queryResult)
-                            echo "Not Working";
-                    }
+                    $sql = "INSERT INTO `bookings` (`booking_id`, `customer_id`, `route_id`, `customer_route`, `booked_amount`, `booked_seat`, `booking_created`) VALUES ('$booking_id','$customer_id', '$route_id','$route', '$amount', '$booked_seat', current_timestamp());";
+                    $result = mysqli_query($conn, $sql);
 
                     if($result)
                         $booking_added = true;
+                    else{
+                        echo "Error: " . mysqli_error($conn);
+                        exit();
+                    }
                 }
     
                 if($booking_added)
@@ -98,16 +124,16 @@
                     </div>';
 
                     // Update the Seats table
-                    $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
-                    $seats = get_from_table($conn, "seats", "bus_no", $bus_no, "seat_booked");
+                   
+                    $seats = get_from_table($conn, "seats", "route_id", $route_id, "seat_booked");
                     if($seats)
                     {
                         $seats .= "," . $booked_seat;
                     }
-                    else 
+                    else
                         $seats = $booked_seat;
 
-                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`bus_no` = '$bus_no';";
+                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`route_id` = '$route_id';";
                     mysqli_query($conn, $updateSeatSql);
                 }
                 else{
@@ -118,63 +144,8 @@
                     </div>';
                 }
             }
-            if(isset($_POST["edit"]))
-            {
-                // EDIT BOOKING
-                // echo "<pre>";
-                // var_export($_POST);
-                // echo "</pre>";die;
-                $cname = $_POST["cname"];
-                $cphone = $_POST["cphone"];
-                $id = $_POST["id"];
-                $customer_id = $_POST["customer_id"];
-                $id_if_customer_exists = exist_customers($conn,$cname,$cphone);
-
-                if(!$id_if_customer_exists || $customer_id == $id_if_customer_exists)
-                {
-                    $updateSql = "UPDATE `customers` SET
-                    `customer_name` = '$cname',
-                    `customer_phone` = '$cphone' WHERE `customers`.`customer_id` = '$customer_id';";
-
-                    $updateResult = mysqli_query($conn, $updateSql);
-                    $rowsAffected = mysqli_affected_rows($conn);
-    
-                    $messageStatus = "danger";
-                    $messageInfo = "";
-                    $messageHeading = "Error!";
-    
-                    if(!$rowsAffected)
-                    {
-                        $messageInfo = "No Edits Administered!";
-                    }
-    
-                    elseif($updateResult)
-                    {
-                        // Show success alert
-                        $messageStatus = "success";
-                        $messageHeading = "Successfull!";
-                        $messageInfo = "Customer details Edited";
-                    }
-                    else{
-                        // Show error alert
-                        $messageInfo = "Your request could not be processed due to technical Issues from our part. We regret the inconvenience caused";
-                    }
-    
-                    // MESSAGE
-                    echo '<div class="my-0 alert alert-'.$messageStatus.' alert-dismissible fade show" role="alert">
-                    <strong>'.$messageHeading.'</strong> '.$messageInfo.'
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>';
+        }
                 }
-                else{
-                    // If customer details already exists
-                    echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error!</strong> Customer already exists
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>';
-                }
-
-            }
             if(isset($_POST["delete"]))
             {
                 // DELETE BOOKING
@@ -195,14 +166,14 @@
                 }
 
                 elseif($deleteResult)
-                {   
+                {
                     $messageStatus = "success";
                     $messageInfo = "Booking Details deleted";
                     $messageHeading = "Successfull!";
 
                     // Update the Seats table
-                    $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
-                    $seats = get_from_table($conn, "seats", "bus_no", $bus_no, "seat_booked");
+                   
+                    $seats = get_from_table($conn, "seats", "route_id", $route_id, "seat_booked");
 
                     // Extract the seat no. that needs to be deleted
                     $booked_seat = $_POST["booked_seat"];
@@ -212,7 +183,7 @@
                     array_splice($seats,$idx,1);
                     $seats = implode(",", $seats);
 
-                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`bus_no` = '$bus_no';";
+                    $updateSeatSql = "UPDATE `seats` SET `seat_booked` = '$seats' WHERE `seats`.`route_id` = '$route_id';";
                     mysqli_query($conn, $updateSeatSql);
                 }
                 else{
@@ -231,10 +202,23 @@
 
 if( isset($_GET["name"]) || isset($_GET["contact"]))
   {
-      $name = $_GET["name"];
-      $contact = $_GET["contact"];
+      $name = strtoupper(trim($_GET["name"]));
+
+      $contact = strtoupper(trim($_GET["contact"]));
       $sql = "SELECT * FROM customers WHERE 1=1 ";
 
+
+      
+      if (empty($name) && empty($contact))
+          {
+              echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
+              <strong>Error!</strong> No results found!
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>';
+              
+          }
+      else {
+      
       if (!empty($name)) {
           $sql .= " AND customer_name = '$name'";
       }
@@ -245,25 +229,152 @@ if( isset($_GET["name"]) || isset($_GET["contact"]))
       
       $result = mysqli_query($conn, $sql);
       
+      if(!$result)
+          {
+                      echo "Error: " . mysqli_error($conn);
+                      exit();
+          }
+      
       $num = mysqli_num_rows($result);
       
       if($num)
           {
-              while($row = mysqli_fetch_assoc($result))
+              if($row = mysqli_fetch_assoc($result))
                   {
                       $customer_id = $row["customer_id"];
-                      $sql1 =  "SELECT * FROM bookings WHERE customer_id= '$customer_id' ";
+                      
+                     
+                      $sql =  "SELECT * FROM bookings WHERE customer_id= '$customer_id' ";
+                      $result = mysqli_query($conn, $sql);
+                      $num = mysqli_num_rows($result);
+                      
+                      if(!$result)
+                          {
+                                      echo "Error: " . mysqli_error($conn);
+                                      exit();
+                          }
+                      if($num)
+                          {
+                              ?>
+                              <table class="table table-hover table-bordered">
+                                  <thead>
+                                      <th>PNR</th>
+                                      <th>Name</th>
+                                      <th>Contact</th>
+                                      <th>Bus</th>
+                                      <th>Route</th>
+                                      <th>Seat</th>
+                                      <th>Amount</th>
+                                      <th>Departure</th>
+                                      <th>Booked</th>
+                                      <th>Actions</th>
+                                  </thead>
+                                  <?php
+                                      while($row = mysqli_fetch_assoc($result))
+                                      {
+                                              // echo "<pre>";
+                                              // var_export($row);
+                                              // echo "</pre>";
+                                          $id = $row["id"];
+                                          $customer_id = $row["customer_id"];
+                                          $route_id = $row["route_id"];
+
+                                          $pnr = $row["booking_id"];
+
+                                          $customer_name = get_from_table($conn, "customers","customer_id", $customer_id, "customer_name");
+                                          
+                                          $customer_phone = get_from_table($conn,"customers","customer_id", $customer_id, "customer_phone");
+
+                                          $bus_no = get_from_table($conn, "routes", "route_id", $route_id, "bus_no");
+
+                                          $route = $row["customer_route"];
+
+                                          $booked_seat = $row["booked_seat"];
+                                          
+                                          $booked_amount = $row["booked_amount"];
+
+                                          $dep_date = get_from_table($conn, "routes", "route_id", $route_id, "route_dep_date");
+
+                                          $dep_time = get_from_table($conn, "routes", "route_id", $route_id, "route_dep_time");
+
+                                          $booked_timing = $row["booking_created"];
+                                          
+                                          ?>
+                                 
+                                  <tr>
+                                      <td>
+                                          <?php
+                                              echo $pnr;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $customer_name;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $customer_phone;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $bus_no;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $route;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $booked_seat;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo '$'.$booked_amount;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $dep_date . " , ". $dep_time;
+                                          ?>
+                                      </td>
+                                      <td>
+                                          <?php
+                                              echo $booked_timing;
+                                          ?>
+                                      </td>
+                                      <td>
+                                     
+                                          <button class="button delete-button btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                          data-id="<?php
+                                                          echo $id;?>" data-bookedseat="<?php
+                                                          echo $booked_seat;
+                                                      ?>" data-routeid="<?php
+                                                      echo $route_id;
+                                                  ?>"> Delete</button>
+                                      </td>
+                                  </tr>
+                                  <?php
+                                  }
+                              ?>
+                              </table>
+                              <?php
+                          }
                   }
-     
-              
-  }
-      else{
+          }
+      else
+      {
           echo '<div class="my-0 alert alert-danger alert-dismissible fade show" role="alert">
           <strong>Error!</strong> No results found!
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>';
       }
 }
+    }
         ?>
 
 
@@ -381,78 +492,74 @@ if( isset($_GET["name"]) || isset($_GET["contact"]))
                         ?>
                         <tr>
                             <td>
-                                <?php 
+                                <?php
                                     echo $pnr;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $customer_name;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $customer_phone;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $bus_no;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $route;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $booked_seat;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo '$'.$booked_amount;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $dep_date . " , ". $dep_time;
                                 ?>
                             </td>
                             <td>
-                                <?php 
+                                <?php
                                     echo $booked_timing;
                                 ?>
                             </td>
                             <td>
-                            <button class="button btn-sm edit-button" data-link="<?php echo $_SERVER['REQUEST_URI']; ?>" data-customerid="<?php 
-                                                echo $customer_id;?>" data-id="<?php 
-                                                echo $id;?>" data-name="<?php 
-                                                echo $customer_name;?>" data-phone="<?php 
-                                                echo $customer_phone;?>" >Edit</button>
-                                <button class="button delete-button btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" 
-                                data-id="<?php 
-                                                echo $id;?>" data-bookedseat="<?php 
+                           
+                                <button class="button delete-button btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                data-id="<?php
+                                                echo $id;?>" data-bookedseat="<?php
                                                 echo $booked_seat;
-                                            ?>" data-routeid="<?php 
+                                            ?>" data-routeid="<?php
                                             echo $route_id;
                                         ?>"> Delete</button>
                             </td>
                         </tr>
-                        <?php 
+                        <?php
                         }
                     ?>
                     </table>
                 </div>
             </section>
-            <?php } ?> 
+            <?php } ?>
         </div>
     </main>
 
 
     <!-- Requiring _getJSON.php-->
-    <!-- Will have access to variables 
+    <!-- Will have access to variables
         1. routeJson
         2. customerJson
         3. seatJson
@@ -464,6 +571,9 @@ if( isset($_GET["name"]) || isset($_GET["contact"]))
     
     <!-- All Modals Here -->
     <!-- Add Booking Modal -->
+
+
+    
     <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-scrollable">
                     <div class="modal-content">

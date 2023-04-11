@@ -12,9 +12,12 @@
         $user_fullname = $row["user_fullname"];
         $user_name = $row["user_name"];
     }
+
 ?>
 
-<!-- <header>
+
+
+<!--
         <nav id="navbar">
             <ul>
                 <li class="nav-item">
@@ -23,11 +26,11 @@
                     ?>
                 </li>
                 <li class="nav-item">
-                    <img class="adminDp" src="../assets/img/admin_pic.jpg" alt="Admin Profile Pic" width="22px" height="22px">
+                    <img class="adminDp" src="../assets/img/admin_pic.jpeg" alt="Admin Profile Pic" width="22px" height="22px">
                 </li>
             </ul>
         </nav>
-    </header> -->
+-->
     <main id="container">
         <div id="sidebar">
             <h4><i class="fas fa-bus"></i> OBTBS</h4>
@@ -39,6 +42,7 @@
                 <p>Administrator</p>
             </div>
             <ul id="options">
+
                 <li class="option <?php if($page=='dashboard'){ echo 'active';}?>"> 
                     <a href="./dashboard.php">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
@@ -51,6 +55,7 @@
                     <i class="fas fa-bus"></i> Buses
                     </a>
                 </li>
+
                 <li class="option <?php if($page=='route'){ echo 'active';}?>">
                     <a href="./route.php">
                     <i class="fas fa-road"></i> Routes    
@@ -62,29 +67,34 @@
                     <i class="fas fa-users"></i> Customers
                     </a>
                 </li>
+
                 <li class="option <?php if($page=='booking'){ echo 'active';}?>">
                     <a href="./booking.php">
                     <i class="fas fa-ticket-alt"></i> Bookings
                     </a>
                 </li>
+
+
                 <li class="option <?php if($page=='seat'){ echo 'active';}?>">
                     <a href="./seat.php">
                     <i class="fas fa-th"></i> Seats
                     </a>
                 </li>
 
-<li class="option <?php if($page=='seat'){ echo 'active';}?>">
+<li class="option <?php if($page=='sales'){ echo 'active';}?>">
     <a href="./sales.php">
     <i class="fas fa-th"></i> Sales
     </a>
 </li>
-<li class="option <?php if($page=='seat'){ echo 'active';}?>">
+<li class="option <?php if($page=='admin'){ echo 'active';}?>">
     <a href="./admin.php">
     <i class="fas fa-th"></i> Admins
     </a>
 </li>
             </ul>
         </div>
+
+
         <div id="main-content">
             <section id="welcome">
                 <ul>
@@ -100,5 +110,16 @@
                             <a href="../assets/partials/_logout.php">LOGOUT</a>
                         </button>
                     </li>
+<li class="welcome-item">
+
+<form method="post" action="../assets/partials/_delete_admin.php">
+    <input type="hidden" name="admin_id" value="<?php echo $user_id; ?>">
+    <button type="submit" name="delete_admin" class="btn-sm">
+        DELETE
+    </button>
+</form>
+
                 </ul>
             </section>
+
+
